@@ -21,6 +21,6 @@ for p in range (t):
             k_g=g*k
             Matriz[i][j]=k_g
            
-    matriz_im = 'matriz_im_'+str(p)+'.fits'
+    matriz_im = os.path.join(carpeta_salida, 'matriz_im_' + str(p) + '.fits')
     print(matriz_im)
-fits.writeto(matriz_im, Matriz, overwrite=True)
+    fits.writeto(matriz_im, Matriz, overwrite=True)
