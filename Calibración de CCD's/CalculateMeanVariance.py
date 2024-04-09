@@ -71,6 +71,7 @@ import matplotlib.pyplot as plt
 # Convertir los datos de la imagen de 2D a 1D para facilitar el trazado
 promedio_flat = promedio_datos.flatten()
 varianza_flat = varianza_datos.flatten()
+promedio_2=varianza_flat/promedio_flat
 #------------
 umbral = 1000
 elementos_mayor_umbral = varianza_flat[varianza_flat > umbral]
@@ -80,10 +81,27 @@ print(varianza_flat)
 print(len(varianza_flat))
 #----------------------------------
 # Graficar la varianza vs el promedio
-plt.figure(figsize=(8, 6))
+
+plt.figure(1)
+#plt.figure(figsize=(8, 6))
 plt.scatter(promedio_flat, varianza_flat, s=1, alpha=0.5)
+#plt.scatter(promedio_flat, promedio_2, s=1, alpha=0.5)
 plt.xlabel('Promedio de los datos')
 plt.ylabel('Varianza de los datos')
 plt.title('Varianza vs Promedio')
 plt.grid(True)
+
+
+# Crear el mapa de colores
+
+plt.figure(2)
+plt.hist2d(promedio_flat, varianza_flat, bins=50, cmap='inferno')
+
+# Agregar barra de colores
+plt.colorbar(label='intencidad')
+
+
+plt.figure(3)
+plt.hist(promedio_2,bins=20)
+plt.xlabel('Ganancia')
 plt.show()
