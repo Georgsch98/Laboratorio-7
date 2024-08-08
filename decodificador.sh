@@ -3,6 +3,7 @@
 # Dirección del servidor remoto y usuario
 REMOTE_USER="lambda"
 REMOTE_HOST="192.120.6.20"
+REMOTE_PASS="skipperccd"  # Contraseña para SSH
 
 # Define los métodos de decodificación que quieres aplicar
 decode_methods="decode_EyT decode_A"
@@ -15,9 +16,9 @@ capture_image() {
   local remote_filename="Nombre_${g}g_${t}s_${i}.jpg"
   
   # Captura la imagen en el servidor remoto y devuelve el nombre del archivo
-  ssh ${REMOTE_USER}@${REMOTE_HOST} << EOF
-  libcamera-still -n -r -o ${remote_filename} --shutter ${t}000000 --gain $g --awbgains 1,1 --immediate
-  echo ${remote_filename}
+  sshpass -p ${REMOTE_PASS} ssh ${REMOTE_USER}@${REMOTE_HOST} << EOF
+libcamera-still -n -r -o ${remote_filename} --shutter ${t}000000 --gain $g --awbgains 1,1 --immediate
+echo ${remote_filename}
 EOF
 }
 
@@ -25,7 +26,7 @@ EOF
 download_image() {
   local remote_filename=$1
   # Descarga la imagen del servidor remoto al directorio actual
-  scp ${REMOTE_USER}@${REMOTE_HOST}:${remote_filename} .
+  sshpass -p ${REMOTE_PASS} scp ${REMOTE_USER}@${REMOTE_HOST}:${remote_filename} .
 }
 
 # Función principal
