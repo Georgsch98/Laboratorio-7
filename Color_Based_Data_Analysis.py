@@ -2,7 +2,7 @@ import pandas as pd
 import numpy as np
 import matplotlib.pyplot as plt
 from IPython import get_ipython
-from matplotlib.lines import Line2D
+
 '''
 # Configuración de los gráficos
 custom_params = {
@@ -340,6 +340,9 @@ plt.grid(True)
 plt.close()
 """
 
+
+from matplotlib.lines import Line2D
+
 # Segundo gráfico: Histograma de Ganancia
 plt.figure(figsize=(8, 6))
 plt.hist(ganancia_reducida_azul, bins=500,histtype='step', color='blue', alpha=1,label="Blue")
@@ -399,9 +402,9 @@ errorbar_verde1 = axs[1].errorbar(
     color='black',
     label='Error'
 )
-# Crear el legend para el scatter y las barras de error
-scatter_legend_verde1 = Line2D([0], [0], marker='x', color='w', markerfacecolor='lime', markersize=7, label='Green 1')
+scatter_legend_verde1 = Line2D([0], [0], marker='x', color='w', markeredgecolor='lime', markersize=7, label='Green 2')
 axs[1].legend(handles=[scatter_legend_verde1, errorbar_verde1], loc='lower right')
+
 axs[1].set_ylabel('Variance [ADU]$^2$')
 axs[1].grid(True)
 
@@ -416,7 +419,7 @@ errorbar_verde2 = axs[2].errorbar(
     label='Error'
 )
 # Crear el legend para el scatter y las barras de error
-scatter_legend_verde2 = Line2D([0], [0], marker='x', color='w', markerfacecolor='darkgreen', markersize=7, label='Green 2')
+scatter_legend_verde2 = Line2D([0], [0], marker='x', color='w', markeredgecolor='darkgreen', markersize=7, label='Green 2')
 axs[2].legend(handles=[scatter_legend_verde2, errorbar_verde2], loc='lower right')
 axs[2].set_ylabel('Variance [ADU]$^2$')
 axs[2].grid(True)
