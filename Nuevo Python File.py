@@ -2,7 +2,7 @@ import pandas as pd
 import numpy as np
 import matplotlib.pyplot as plt
 from IPython import get_ipython
-
+from matplotlib.lines import Line2D
 '''
 # Configuración de los gráficos
 custom_params = {
@@ -81,6 +81,11 @@ ganancia_reducida_verde2 = ganancia_verde2[index_verde2]
 index_rojo = np.argwhere(ganancia_rojo < 1)
 ganancia_reducida_rojo = ganancia_rojo[index_rojo]
 
+#En formato e-/ADU:
+ganancia_reducida_azul=1/ganancia_reducida_azul
+ganancia_reducida_verde1=1/ganancia_reducida_verde1
+ganancia_reducida_verde2=1/ganancia_reducida_verde2
+ganancia_reducida_rojo=1/ganancia_reducida_rojo
 
 # Primer gráfico: Dispersión de Varianza vs Esperanza con opacidad
 
@@ -153,6 +158,7 @@ agrupados_rojo["varianza_std_normalizada"] = agrupados_rojo["varianza_std"] / np
 # Crear la variable ganancia
 
 filtro_azul["ganancia"] = filtro_azul["varianza"] / filtro_azul["esperanza"]
+filtro_azul["ganancia"] = 1/ filtro_azul["ganancia"]
 
 # Crear bins automáticamente para la ganancia
 num_bins = 30  # Número de bins
@@ -174,7 +180,7 @@ agrupados_ganancia_azul["ganancia_std_normalizada"] = agrupados_ganancia_azul["g
 #VERDE1
 
 filtro_verde1["ganancia"] = filtro_verde1["varianza"] / filtro_verde1["esperanza"]
-
+filtro_verde1["ganancia"] = 1/ filtro_verde1["ganancia"]
 # Crear bins automáticamente para la ganancia
 num_bins = 30  # Número de bins
 filtro_verde1["ganancia_bin"], bin_edges = pd.cut(
@@ -195,7 +201,7 @@ agrupados_ganancia_verde1["ganancia_std_normalizada"] = agrupados_ganancia_verde
 #Verde2
 
 filtro_verde2["ganancia"] = filtro_verde2["varianza"] / filtro_verde2["esperanza"]
-
+filtro_verde2["ganancia"] = 1/ filtro_verde2["ganancia"]
 # Crear bins automáticamente para la ganancia
 num_bins = 30  # Número de bins
 filtro_verde2["ganancia_bin"], bin_edges = pd.cut(
@@ -215,6 +221,7 @@ agrupados_ganancia_verde2["ganancia_std_normalizada"] = agrupados_ganancia_verde
 
 #ROJO
 filtro_rojo["ganancia"] = filtro_rojo["varianza"] / filtro_rojo["esperanza"]
+filtro_rojo["ganancia"] = 1/ filtro_rojo["ganancia"]
 
 num_bins = 30  # Número de bins
 filtro_rojo["ganancia_bin"], bin_edges = pd.cut(
@@ -247,7 +254,7 @@ error_ganancia_rojo = np.std(ganancia_reducida_rojo, ddof=1)/np.sqrt(len(gananci
 print(f"ganancia rojo = ({valor_ganancia_rojo} ± {error_ganancia_rojo})")
 
 ################################################################################
-"""
+""" 
 # Calcular la ganancia
 filtro_azul["ganancia"] = filtro_azul["varianza"] / filtro_azul["esperanza"]
 
@@ -333,96 +340,113 @@ plt.grid(True)
 plt.close()
 """
 
-
-
 # Segundo gráfico: Histograma de Ganancia
 plt.figure(figsize=(8, 6))
-plt.hist(ganancia_reducida_azul, bins=500,histtype='step', color='blue', alpha=0.3)
-plt.hist(ganancia_reducida_verde1, bins=500,histtype='step', color='green', alpha=0.3)
-plt.hist(ganancia_reducida_verde2, bins=500,histtype='step', color='orange', alpha=0.3)
-plt.hist(ganancia_reducida_rojo, bins=500,histtype='step', color='red', alpha=0.3)
-plt.title('Histograma de Ganancia', fontsize=14)
-plt.xlabel('Ganancia')
-plt.ylabel('Frecuencia')
+plt.hist(ganancia_reducida_azul, bins=500,histtype='step', color='blue', alpha=1,label="Blue")
+plt.hist(ganancia_reducida_verde1, bins=500,histtype='step', color='lime', alpha=1,label="Green 1")
+plt.hist(ganancia_reducida_verde2, bins=500,histtype='step', color='darkgreen', alpha=1,label="Green 2")
+plt.hist(ganancia_reducida_rojo, bins=500,histtype='step', color='red', alpha=1,label="Red")
+#plt.title('Histograma de Ganancia', fontsize=14)
+plt.xlabel('Gain [e$^-$/ADU]')
+plt.ylabel('Frequency')
 plt.grid(True)
+# Crear una leyenda personalizada con líneas
+custom_lines = [
+    Line2D([0], [0], color='blue', lw=1,alpha=1),
+    Line2D([0], [0], color='lime', lw=1,alpha=1),
+    Line2D([0], [0], color='darkgreen', lw=1,alpha=1),
+    Line2D([0], [0], color='red', lw=1,alpha=1),
+]
+
+plt.legend(custom_lines, ['Blue', 'Green 1', 'Green 2', 'Red'], frameon=True)
 plt.show()
 #plt.close()
 
-"""
 
-fig, axs = plt.subplots(4, 1, figsize=(10, 12), sharex=True, sharey=True)  # 4 filas, 1 columna, compartiendo el eje x
-plt.xlim(0, 600)
-plt.ylim(0,400)
-# Título general de la figura
-fig.suptitle('Variance vs Mean for each color', fontsize=16)
+fig, axs = plt.subplots(4, 1, figsize=(8, 6), sharex=True, sharey=True)  # 4 filas, 1 columna, compartiendo el eje x
+plt.ylim(0, 400)
 
 # Primer gráfico (Azul)
-axs[0].scatter(esperanza_azul, varianza_azul, color='blue', s=1 , label='Blue', alpha=0.005, marker='o')
-axs[0].errorbar(
+scatter_azul = axs[0].scatter(esperanza_azul, varianza_azul, color='blue', s=1, alpha=0.005, marker='o', label='Blue')
+
+# Aquí es donde graficamos las barras de error
+errorbar_azul = axs[0].errorbar(
     agrupados_azul["esperanza_media"],  # Media de esperanza por bin
     agrupados_azul["varianza_media"],  # Media de varianza por bin
     yerr=agrupados_azul["varianza_std_normalizada"],  # Desviación estándar de varianza por bin
     fmt='o',
     color='black',
-    label='error'
+    label='Error'
 )
-#axs[0].set_title('Azul')
+
+# Crear los objetos de la leyenda sin alpha para el scatter
+scatter_legend_azul = Line2D([0], [0], marker='o', color='w', markerfacecolor='blue', markersize=7, label='Blue')
+
+# Crear el legend para el scatter y las barras de error
+axs[0].legend(handles=[scatter_legend_azul, errorbar_azul], loc='lower right')
+
+# Establecer etiquetas y grid
 axs[0].set_ylabel('Variance [ADU]$^2$')
 axs[0].grid(True)
-axs[0].legend()
 
 # Segundo gráfico (Verde 1)
-axs[1].scatter(esperanza_verde1, varianza_verde1, color='green', s=1, label='Green 1', alpha=0.005, marker='x')
-axs[1].errorbar(
+scatter_verde1 = axs[1].scatter(esperanza_verde1, varianza_verde1, color='lime', s=1, alpha=0.005, marker='x', label='Green 1')
+errorbar_verde1 = axs[1].errorbar(
     agrupados_verde1["esperanza_media"],  # Media de esperanza por bin
     agrupados_verde1["varianza_media"],  # Media de varianza por bin
     yerr=agrupados_verde1["varianza_std_normalizada"],  # Desviación estándar de varianza por bin
     fmt='x',
     color='black',
-    label='error'
+    label='Error'
 )
-#axs[1].set_title('Verde 1')
+# Crear el legend para el scatter y las barras de error
+scatter_legend_verde1 = Line2D([0], [0], marker='x', color='w', markerfacecolor='lime', markersize=7, label='Green 1')
+axs[1].legend(handles=[scatter_legend_verde1, errorbar_verde1], loc='lower right')
 axs[1].set_ylabel('Variance [ADU]$^2$')
 axs[1].grid(True)
-axs[1].legend()
 
 # Tercer gráfico (Verde 2)
-axs[2].scatter(esperanza_verde2, varianza_verde2, color='darkgreen', s=1, label='Green 2', alpha=0.005, marker='x')
-axs[2].errorbar(
+scatter_verde2 = axs[2].scatter(esperanza_verde2, varianza_verde2, color='darkgreen', s=1, alpha=0.005, marker='x', label='Green 2')
+errorbar_verde2 = axs[2].errorbar(
     agrupados_verde2["esperanza_media"],  # Media de esperanza por bin
     agrupados_verde2["varianza_media"],  # Media de varianza por bin
     yerr=agrupados_verde2["varianza_std_normalizada"],  # Desviación estándar de varianza por bin
     fmt='x',
     color='black',
-    label='error'
+    label='Error'
 )
-#axs[2].set_title('Verde 2')
+# Crear el legend para el scatter y las barras de error
+scatter_legend_verde2 = Line2D([0], [0], marker='x', color='w', markerfacecolor='darkgreen', markersize=7, label='Green 2')
+axs[2].legend(handles=[scatter_legend_verde2, errorbar_verde2], loc='lower right')
 axs[2].set_ylabel('Variance [ADU]$^2$')
 axs[2].grid(True)
-axs[2].legend()
 
 # Cuarto gráfico (Rojo)
-axs[3].scatter(esperanza_rojo, varianza_rojo, color='red', s=1, label='Red', alpha=0.005, marker='s')
-axs[3].errorbar(
+scatter_rojo = axs[3].scatter(esperanza_rojo, varianza_rojo, color='red', s=1, alpha=0.005, marker='s', label='Red')
+errorbar_rojo = axs[3].errorbar(
     agrupados_rojo["esperanza_media"],  # Media de esperanza por bin
     agrupados_rojo["varianza_media"],  # Media de varianza por bin
     yerr=agrupados_rojo["varianza_std_normalizada"],  # Desviación estándar de varianza por bin
     fmt='s',
     color='black',
-    label='error'
+    label='Error'
 )
-#axs[3].set_title('Rojo')
+# Crear el legend para el scatter y las barras de error
+scatter_legend_rojo = Line2D([0], [0], marker='s', color='w', markerfacecolor='red', markersize=7, label='Red')
+axs[3].legend(handles=[scatter_legend_rojo, errorbar_rojo], loc='lower right')
 axs[3].set_xlabel('Mean [ADU]')
 axs[3].set_ylabel('Variance [ADU]$^2$')
 axs[3].grid(True)
-axs[3].legend()
+
+plt.show()
+
 
 # Ajustar el diseño para evitar solapamiento
-plt.tight_layout(rect=[0, 0, 1, 0.96])  # Deja espacio para el título general
+#plt.tight_layout(rect=[0, 0, 1, 0.96])  # Deja espacio para el título general
 
 # Mostrar el gráfico
 plt.show()
-"""
+
 
 #ganancia en funcion de la esperanza
 
@@ -436,7 +460,7 @@ plt.errorbar(
     fmt='o',
     color='blue',
     label='Blue',
-    alpha=0.3,
+    alpha=1,
 )
 
 #plt.scatter(esperanza_verde1,ganancia_verde1,s=1, color='green', alpha=0.3,label='ganancia_verde1')
@@ -445,9 +469,9 @@ plt.errorbar(
     agrupados_ganancia_verde1["ganancia_media"],  # Media de varianza por bin
     yerr=agrupados_ganancia_verde1["ganancia_std_normalizada"],  # Desviación estándar de varianza por bin
     fmt='x',
-    color='green',
-    label='Green1',
-    alpha=0.3,
+    color='lime',
+    label='Green 1',
+    alpha=1,
 )
 #plt.scatter(esperanza_verde2,ganancia_verde2,s=1, color='darkgreen', alpha=0.3,label='ganancia_verde2')
 plt.errorbar(
@@ -456,8 +480,8 @@ plt.errorbar(
     yerr=agrupados_ganancia_verde2["ganancia_std_normalizada"],  # Desviación estándar de varianza por bin
     fmt='x',
     color='darkgreen',
-    label='Green2',
-    alpha=0.3,
+    label='Green 2',
+    alpha=1,
 )
 #plt.scatter(esperanza_rojo,ganancia_rojo,s=1, color='red', alpha=0.3,label='ganancia_rojo')
 plt.errorbar(
@@ -467,12 +491,12 @@ plt.errorbar(
     fmt='s',
     color='red',
     label='Red',
-    alpha=0.3,
+    alpha=1,
 )  
 #plt.title('Histograma de Ganancia', fontsize=14)
-plt.xlabel('Esperanza')
-plt.ylabel('Ganancia')
-plt.legend()
+plt.xlabel('Mean [ADU]')
+plt.ylabel('Gain [e$^-$/ADU]')
+plt.legend(loc='lower right')
 plt.grid(True)
 plt.show()
 #plt.close()
